@@ -30,8 +30,8 @@ app.set('view engine', 'handlebars');
 
 
 // Database configuration with mongoose
-// mongoose.connect('mongodb://heroku_w5gfkrtq:1sifjmitc8kmlr5rk77kh9qk39@ds041486.mlab.com:41486/heroku_w5gfkrtq');
-mongoose.connect('mongodb://localhost/week18homeworkdb');
+mongoose.connect('mongodb://heroku_w5gfkrtq:1sifjmitc8kmlr5rk77kh9qk39@ds041486.mlab.com:41486/heroku_w5gfkrtq');
+// mongoose.connect('mongodb://localhost/week18homeworkdb');
 var db = mongoose.connection;
 
 // show any mongoose errors
@@ -185,7 +185,10 @@ app.post('/save', function(req, res){
 
 
 
+
+
+var PORT = process.env.PORT || 3000;
 // listen on port 3000
-app.listen(3000, function() {
+app.listen(PORT, function() {
   console.log('App running on port 3000!');
 });
