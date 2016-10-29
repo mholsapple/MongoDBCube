@@ -1,20 +1,29 @@
 {
-  "name": "mongoose_skeleton",
+  "name": "talktomegoose",
   "version": "1.0.0",
-  "description": "",
+  "description": "mongodb and mongoose homework",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mholsapple/MongoDBCube.git"
   },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mholsapple/MongoDBCube/issues"
+  },
+  "homepage": "https://github.com/mholsapple/MongoDBCube#readme",
   "dependencies": {
-    "body-parser": "^1.15.0",
-    "cheerio": "^0.20.0",
-    "express": "^4.13.4",
-    "mongoose": "^4.4.6",
+    "body-parser": "^1.15.2",
+    "cheerio": "^0.22.0",
+    "express": "^4.14.0",
+    "express-handlebars": "^3.0.0",
+    "mongoose": "^4.6.5",
+    "request": "^2.76.0",
     "morgan": "^1.7.0",
-    "request": "^2.69.0"
+    "mongojs": "^2.3.0"
   }
 }

@@ -21,9 +21,17 @@ app.use(bodyParser.urlencoded({
 // make public a static dir
 app.use(express.static('public'));
 
+// set up handlebars default layout and view engine
+var exphbs = require('express-handlebars');
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main'
+}));
+app.set('view engine', 'handlebars');
+
 
 // Database configuration with mongoose
-mongoose.connect('mongodb://localhost/week18day3mongoose');
+// mongoose.connect('mongodb://heroku_w5gfkrtq:1sifjmitc8kmlr5rk77kh9qk39@ds041486.mlab.com:41486/heroku_w5gfkrtq');
+mongoose.connect('mongodb://localhost/week18homeworkdb');
 var db = mongoose.connection;
 
 // show any mongoose errors
@@ -47,25 +55,25 @@ var Article = require('./models/Article.js');
 
 // Simple index route
 app.get('/', function(req, res) {
-  res.send(index.html);
+  res.render('home');
 });
 
-// A GET request to scrape the echojs website.
-app.get('/scrape', function(req, res) {
+// A POST request to scrape the echojs website.
+app.post('/fetch', function(req, res) {
 	// first, we grab the body of the html with request
-  request('http://www.echojs.com/', function(error, response, html) {
+  request('http://www.nytimes.com/', function(error, response, html) {
   	// then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
     // now, we grab every h2 within an article tag, and do the following:
-    $('article h2').each(function(i, element) {
+    $('article.story.theme-summary').each(function(i, element) {
 
     		// save an empty result object
 				var result = {};
 
 				// add the text and href of every link, 
 				// and save them as properties of the result obj
-				result.title = $(this).children('a').text();
-				result.link = $(this).children('a').attr('href');
+				result.title = $(element).find('.story-heading').find('a').text();
+				result.summary = $(element).find('p.summary').text();
 
 				// using our Article model, create a new entry.
 				// Notice the (result):
@@ -76,15 +84,13 @@ app.get('/scrape', function(req, res) {
 				entry.save(function(err, doc) {
 					// log any errors
 				  if (err) {
-				    console.log(err);
+				    //console.log(err);
 				  } 
 				  // or log the doc
 				  else {
-				    console.log(doc);
+				    //console.log(doc);
 				  }
 				});
-
-
     });
   });
   // tell the browser that we finished scraping the text.
@@ -92,7 +98,7 @@ app.get('/scrape', function(req, res) {
 });
 
 // this will get the articles we scraped from the mongoDB
-app.get('/articles', function(req, res){
+app.get('/check', function(req, res){
 	// grab every doc in the Articles array
 	Article.find({}, function(err, doc){
 		// log any errors
@@ -107,14 +113,11 @@ app.get('/articles', function(req, res){
 });
 
 // grab an article by it's ObjectId
-app.get('/articles/:id', function(req, res){
+app.post('/gather', function(req, res){
 	// using the id passed in the id parameter, 
 	// prepare a query that finds the matching one in our db...
-	Article.findOne({'_id': req.params.id})
-	// and populate all of the notes associated with it.
-	.populate('note')
-	// now, execute our query
-	.exec(function(err, doc){
+	Note.find({'id': req.body.id}, function(err, doc){
+	
 		// log any errors
 		if (err){
 			console.log(err);
@@ -126,10 +129,27 @@ app.get('/articles/:id', function(req, res){
 	});
 });
 
+app.delete('/delete', function(req, res){
+	// using the id passed in the id parameter, 
+	// prepare a query that finds the matching one in our db...
+	Note.remove({'id': req.body.id}) 
+
+		.exec(function(err, doc){
+	
+		// log any errors
+		if (err){
+			console.log(err);
+		} 
+		// otherwise, send the doc to the browser as a json object
+		else {
+			res.json(doc);
+		}
+	});
+});
 
 // replace the existing note of an article with a new one
 // or if no note exists for an article, make the posted note it's note.
-app.post('/articles/:id', function(req, res){
+app.post('/save', function(req, res){
 	// create a new note and pass the req.body to the entry.
 	var newNote = new Note(req.body);
 
@@ -146,7 +166,7 @@ app.post('/articles/:id', function(req, res){
 			// and update it to make it's lone note the one we just saved
 			Article.findOneAndUpdate({'_id': req.params.id}, {'note':doc._id})
 			// execute the above query
-			.exec(function(err, doc){
+			.exec(function(err, doc2){
 				// log any errors
 				if (err){
 					console.log(err);
